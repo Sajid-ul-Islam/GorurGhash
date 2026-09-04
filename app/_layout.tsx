@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { Platform, StatusBar } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import UpdatesHandler from '../src/components/UpdatesHandler';
 import { AuthProvider } from '../src/context/AuthContext';
 import { CartProvider } from '../src/context/CartContext';
@@ -14,19 +14,29 @@ export { ErrorBoundary } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+// Ensure Android enables true edge-to-edge translucent status bar immediately on boot
+if (Platform.OS === 'android') {
+  StatusBar.setTranslucent(true);
+  StatusBar.setBackgroundColor('transparent');
+}
+
 export default function RootLayout() {
   useEffect(() => {
+    if (Platform.OS === 'android') {
+      StatusBar.setTranslucent(true);
+      StatusBar.setBackgroundColor('transparent');
+    }
     SplashScreen.hideAsync().catch(() => {});
   }, []);
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
             <OrderProvider>
               <UpdatesHandler>
-                <StatusBar style="dark" />
+                <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
                 <Stack
                   screenOptions={{
                     headerShown: false,

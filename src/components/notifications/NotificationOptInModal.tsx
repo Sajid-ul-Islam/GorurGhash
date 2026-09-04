@@ -22,7 +22,7 @@ export const NotificationOptInModal: React.FC<NotificationOptInModalProps> = ({
   onDismiss,
 }) => {
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onDismiss}>
+    <Modal visible={visible} animationType="fade" transparent statusBarTranslucent onRequestClose={onDismiss}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.iconCircle}>

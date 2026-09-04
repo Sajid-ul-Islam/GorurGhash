@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, Platform, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -69,8 +69,11 @@ export const Header: React.FC<HeaderProps> = ({
     return unsubscribe;
   }, []);
 
+  const topInset =
+    Platform.OS === 'android' ? Math.max(insets.top, StatusBar.currentHeight || 0) : insets.top;
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: topInset }]}>
       <View style={styles.headerContent}>
         <View style={styles.leftSection}>
           {showBack ? (

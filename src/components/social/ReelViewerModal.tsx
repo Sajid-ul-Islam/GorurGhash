@@ -314,8 +314,14 @@ export const ReelViewerModal: React.FC<ReelViewerModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" translucent />
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={styles.backdrop}>
         <SingleReelPlayer
           reel={currentReel}

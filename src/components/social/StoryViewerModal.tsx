@@ -113,8 +113,14 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({
   if (!visible || !activeStory) return null;
 
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={styles.backdrop}>
         {/* Main media: In-App Video or Image */}
         {activeStory.mediaType === 'video' ? (

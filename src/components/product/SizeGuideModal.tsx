@@ -42,7 +42,7 @@ export const SizeGuideModal: React.FC<SizeGuideModalProps> = ({
   ];
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.sheetContainer}>
           <View style={styles.header}>

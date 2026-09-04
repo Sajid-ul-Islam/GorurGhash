@@ -214,6 +214,7 @@ export default function ShopScreen() {
       <Modal
         visible={isSortModalVisible}
         transparent
+        statusBarTranslucent
         animationType="fade"
         onRequestClose={() => setIsSortModalVisible(false)}
       >

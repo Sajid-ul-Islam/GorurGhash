@@ -179,7 +179,7 @@ export default function NotificationsScreen() {
       />
 
       {/* Preferences Modal */}
-      <Modal visible={showSettings} animationType="slide" transparent onRequestClose={() => setShowSettings(false)}>
+      <Modal visible={showSettings} animationType="slide" transparent statusBarTranslucent onRequestClose={() => setShowSettings(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
