@@ -21,6 +21,15 @@
       },
       "predictiveBackGestureEnabled": false
     },
+    "androidStatusBar": {
+      "backgroundColor": "#00000000",
+      "barStyle": "dark-content",
+      "translucent": true
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#00000000",
+      "barStyle": "dark-content"
+    },
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -36,7 +45,8 @@
           "backgroundColor": "#FBDD01"
         }
       ],
-      "expo-updates"
+      "expo-updates",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true

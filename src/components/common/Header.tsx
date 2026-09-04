@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Spacing, Typography } from '../../constants/theme';
 import { useWishlist } from '../../context/WishlistContext';
 import { notificationService } from '../../services/notifications/NotificationService';
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   rightAction,
 }) => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { count: wishlistCount } = useWishlist();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
 
@@ -68,98 +70,100 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.leftSection}>
-        {showBack ? (
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => router.back()}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-          </TouchableOpacity>
-        ) : null}
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.headerContent}>
+        <View style={styles.leftSection}>
+          {showBack ? (
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => router.back()}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+            </TouchableOpacity>
+          ) : null}
 
-        {title ? (
-          <View style={styles.titleContainer}>
-            <Text style={styles.screenTitle} numberOfLines={1}>
-              {title}
-            </Text>
-            {subtitle && <Text style={styles.screenSubtitle}>{subtitle}</Text>}
-          </View>
-        ) : (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => router.push('/(tabs)')}
-            style={styles.brandContainer}
-          >
-            <View style={styles.brandBadge}>
-              <Image
-                source={require('../../../assets/images/gorurghash-cow.png')}
-                style={styles.brandLogoImage}
-                resizeMode="contain"
-              />
+          {title ? (
+            <View style={styles.titleContainer}>
+              <Text style={styles.screenTitle} numberOfLines={1}>
+                {title}
+              </Text>
+              {subtitle && <Text style={styles.screenSubtitle}>{subtitle}</Text>}
             </View>
-            <View>
-              <Text style={styles.brandTitle}>GORUR GHASH</Text>
-              <Text style={styles.brandTagline}>গরুর ঘাস • DHAKA STREETWEAR</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      </View>
+          ) : (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => router.push('/(tabs)')}
+              style={styles.brandContainer}
+            >
+              <View style={styles.brandBadge}>
+                <Image
+                  source={require('../../../assets/images/gorurghash-cow.png')}
+                  style={styles.brandLogoImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <View>
+                <Text style={styles.brandTitle}>GORUR GHASH</Text>
+                <Text style={styles.brandTagline}>গরুর ঘাস • DHAKA STREETWEAR</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        </View>
 
-      <View style={styles.rightSection}>
-        {rightAction}
+        <View style={styles.rightSection}>
+          {rightAction}
 
-        {showSearch && !title && (
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => router.push('/(tabs)/shop')}
-            accessibilityLabel="Search catalog"
-          >
-            <Ionicons name="search-outline" size={22} color={Colors.textPrimary} />
-          </TouchableOpacity>
-        )}
+          {showSearch && !title && (
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => router.push('/(tabs)/shop')}
+              accessibilityLabel="Search catalog"
+            >
+              <Ionicons name="search-outline" size={22} color={Colors.textPrimary} />
+            </TouchableOpacity>
+          )}
 
-        {showWishlist && (
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => router.push('/(tabs)/wishlist')}
-            accessibilityLabel="Saved Wishlist"
-          >
-            <Ionicons name="heart-outline" size={22} color={Colors.textPrimary} />
-            {wishlistCount > 0 && (
-              <Animated.View
-                style={[
-                  styles.badge,
-                  { backgroundColor: Colors.brandRed, transform: [{ scale: wishlistBadgeScale }] },
-                ]}
-              >
-                <Text style={styles.badgeText}>{wishlistCount}</Text>
-              </Animated.View>
-            )}
-          </TouchableOpacity>
-        )}
+          {showWishlist && (
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => router.push('/(tabs)/wishlist')}
+              accessibilityLabel="Saved Wishlist"
+            >
+              <Ionicons name="heart-outline" size={22} color={Colors.textPrimary} />
+              {wishlistCount > 0 && (
+                <Animated.View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: Colors.brandRed, transform: [{ scale: wishlistBadgeScale }] },
+                  ]}
+                >
+                  <Text style={styles.badgeText}>{wishlistCount}</Text>
+                </Animated.View>
+              )}
+            </TouchableOpacity>
+          )}
 
-        {showNotifications && (
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => router.push('/notifications')}
-            accessibilityLabel="Notifications & Offers"
-          >
-            <Ionicons name="notifications-outline" size={22} color={Colors.textPrimary} />
-            {unreadNotifs > 0 && (
-              <Animated.View
-                style={[
-                  styles.badge,
-                  { backgroundColor: '#FBDD01', transform: [{ scale: notifBadgeScale }] },
-                ]}
-              >
-                <Text style={[styles.badgeText, { color: '#000000' }]}>{unreadNotifs}</Text>
-              </Animated.View>
-            )}
-          </TouchableOpacity>
-        )}
+          {showNotifications && (
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => router.push('/notifications')}
+              accessibilityLabel="Notifications & Offers"
+            >
+              <Ionicons name="notifications-outline" size={22} color={Colors.textPrimary} />
+              {unreadNotifs > 0 && (
+                <Animated.View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: '#FBDD01', transform: [{ scale: notifBadgeScale }] },
+                  ]}
+                >
+                  <Text style={[styles.badgeText, { color: '#000000' }]}>{unreadNotifs}</Text>
+                </Animated.View>
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -167,14 +171,16 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
     backgroundColor: Colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderSubtle,
+  },
+  headerContent: {
+    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSubtle,
   },
   leftSection: {
     flexDirection: 'row',

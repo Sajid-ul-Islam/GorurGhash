@@ -12,11 +12,36 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { SocialStory } from '../../services/social/ISocialService';
 import { Colors, Typography, BorderRadius, Spacing } from '../../constants/theme';
 import { formatPrice } from '../../utils/formatters';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const StoryVideo: React.FC<{ url: string; isPaused: boolean }> = ({ url, isPaused }) => {
+  const player = useVideoPlayer(url, (p) => {
+    p.loop = true;
+    p.play();
+  });
+
+  useEffect(() => {
+    if (isPaused) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  }, [isPaused, player]);
+
+  return (
+    <VideoView
+      style={styles.fullMedia}
+      player={player}
+      contentFit="cover"
+      nativeControls={false}
+    />
+  );
+};
 
 interface StoryViewerModalProps {
   visible: boolean;
@@ -91,12 +116,16 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <View style={styles.backdrop}>
-        {/* Main media image */}
-        <Image
-          source={{ uri: activeStory.mediaUrl }}
-          style={styles.fullMedia}
-          resizeMode="cover"
-        />
+        {/* Main media: In-App Video or Image */}
+        {activeStory.mediaType === 'video' ? (
+          <StoryVideo url={activeStory.mediaUrl} isPaused={!visible} />
+        ) : (
+          <Image
+            source={{ uri: activeStory.mediaUrl }}
+            style={styles.fullMedia}
+            resizeMode="cover"
+          />
+        )}
 
         {/* Overlay gradient darkness for text readability */}
         <View style={styles.topGradient} />
