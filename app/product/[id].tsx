@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import FullScreenContainer from '../../src/components/FullScreenContainer';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,6 +29,8 @@ export default function ProductDetailScreen() {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [addedToast, setAddedToast] = useState<boolean>(false);
+  const toastAnim = useRef(new Animated.Value(0)).current;
+  const heartScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -64,6 +66,14 @@ export default function ProductDetailScreen() {
 
   const wishlisted = isInWishlist(product.id);
 
+  const handleToggleWishlist = () => {
+    Animated.sequence([
+      Animated.timing(heartScale, { toValue: 1.35, duration: 120, useNativeDriver: true }),
+      Animated.spring(heartScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }),
+    ]).start();
+    toggleWishlist(product);
+  };
+
   const handleAddToCart = () => {
     if (!selectedSize && product.sizes.length > 0) {
       Alert.alert('Select Size', 'Please choose your preferred size before adding to bag.');
@@ -71,7 +81,20 @@ export default function ProductDetailScreen() {
     }
     addToCart(product, selectedSize || 'Free Size', 1);
     setAddedToast(true);
-    setTimeout(() => setAddedToast(false), 2500);
+    toastAnim.setValue(0);
+    Animated.timing(toastAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+
+    setTimeout(() => {
+      Animated.timing(toastAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => setAddedToast(false));
+    }, 2400);
   };
 
   const handleBuyNow = () => {
@@ -91,13 +114,16 @@ export default function ProductDetailScreen() {
         rightAction={
           <TouchableOpacity
             style={styles.wishlistHeaderBtn}
-            onPress={() => toggleWishlist(product)}
+            onPress={handleToggleWishlist}
+            accessibilityLabel={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Ionicons
-              name={wishlisted ? 'heart' : 'heart-outline'}
-              size={22}
-              color={wishlisted ? Colors.brandRed : Colors.textPrimary}
-            />
+            <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+              <Ionicons
+                name={wishlisted ? 'heart' : 'heart-outline'}
+                size={22}
+                color={wishlisted ? Colors.brandRed : Colors.textPrimary}
+              />
+            </Animated.View>
           </TouchableOpacity>
         }
       />
@@ -213,13 +239,28 @@ export default function ProductDetailScreen() {
 
       {/* Added Toast Notification */}
       {addedToast && (
-        <View style={styles.toastBanner}>
+        <Animated.View
+          style={[
+            styles.toastBanner,
+            {
+              opacity: toastAnim,
+              transform: [
+                {
+                  translateY: toastAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-20, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           <Ionicons name="checkmark-circle" size={20} color={Colors.textWhite} />
           <Text style={styles.toastText}>Added to your shopping bag!</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/cart')}>
             <Text style={styles.toastLink}>View Bag</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       )}
 
       {/* Sticky Bottom Actions */}

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../../constants/theme';
@@ -31,10 +31,38 @@ export const Header: React.FC<HeaderProps> = ({
   const { count: wishlistCount } = useWishlist();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
 
+  const wishlistBadgeScale = useRef(new Animated.Value(1)).current;
+  const notifBadgeScale = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
-    notificationService.getUnreadCount().then(setUnreadNotifs);
+    if (wishlistCount > 0) {
+      Animated.sequence([
+        Animated.timing(wishlistBadgeScale, { toValue: 1.3, duration: 120, useNativeDriver: true }),
+        Animated.spring(wishlistBadgeScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [wishlistCount]);
+
+  useEffect(() => {
+    notificationService.getUnreadCount().then((count) => {
+      setUnreadNotifs(count);
+      if (count > 0) {
+        Animated.sequence([
+          Animated.timing(notifBadgeScale, { toValue: 1.3, duration: 120, useNativeDriver: true }),
+          Animated.spring(notifBadgeScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }),
+        ]).start();
+      }
+    });
     const unsubscribe = notificationService.subscribe(() => {
-      notificationService.getUnreadCount().then(setUnreadNotifs);
+      notificationService.getUnreadCount().then((count) => {
+        setUnreadNotifs(count);
+        if (count > 0) {
+          Animated.sequence([
+            Animated.timing(notifBadgeScale, { toValue: 1.3, duration: 120, useNativeDriver: true }),
+            Animated.spring(notifBadgeScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }),
+          ]).start();
+        }
+      });
     });
     return unsubscribe;
   }, []);
@@ -101,9 +129,14 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Ionicons name="heart-outline" size={22} color={Colors.textPrimary} />
             {wishlistCount > 0 && (
-              <View style={[styles.badge, { backgroundColor: Colors.brandRed }]}>
+              <Animated.View
+                style={[
+                  styles.badge,
+                  { backgroundColor: Colors.brandRed, transform: [{ scale: wishlistBadgeScale }] },
+                ]}
+              >
                 <Text style={styles.badgeText}>{wishlistCount}</Text>
-              </View>
+              </Animated.View>
             )}
           </TouchableOpacity>
         )}
@@ -116,9 +149,14 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Ionicons name="notifications-outline" size={22} color={Colors.textPrimary} />
             {unreadNotifs > 0 && (
-              <View style={[styles.badge, { backgroundColor: '#FBDD01' }]}>
+              <Animated.View
+                style={[
+                  styles.badge,
+                  { backgroundColor: '#FBDD01', transform: [{ scale: notifBadgeScale }] },
+                ]}
+              >
                 <Text style={[styles.badgeText, { color: '#000000' }]}>{unreadNotifs}</Text>
-              </View>
+              </Animated.View>
             )}
           </TouchableOpacity>
         )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ import { Product } from '../../types';
 import { Colors, BorderRadius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { formatPrice } from '../../utils/formatters';
 import { useWishlist } from '../../context/WishlistContext';
+import { useCart } from '../../context/CartContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - Spacing.lg * 2 - Spacing.md) / 2;
@@ -28,7 +30,33 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const router = useRouter();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const wishlisted = isInWishlist(product.id);
+
+  const heartScale = useRef(new Animated.Value(1)).current;
+  const bagScale = useRef(new Animated.Value(1)).current;
+  const [justAdded, setJustAdded] = useState(false);
+
+  const handleToggleWishlist = () => {
+    Animated.sequence([
+      Animated.timing(heartScale, { toValue: 1.35, duration: 120, useNativeDriver: true }),
+      Animated.spring(heartScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }),
+    ]).start();
+    toggleWishlist(product);
+  };
+
+  const handleQuickAdd = () => {
+    if (!product.inStock) return;
+    Animated.sequence([
+      Animated.timing(bagScale, { toValue: 0.8, duration: 100, useNativeDriver: true }),
+      Animated.spring(bagScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true }),
+    ]).start();
+
+    const chosenSize = product.sizes.length > 0 ? product.sizes[0] : 'Free Size';
+    addToCart(product, chosenSize, 1);
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1800);
+  };
 
   const discountPercent =
     product.regularPrice && product.regularPrice > product.price
@@ -59,19 +87,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </View>
         ) : null}
 
-        {/* Floating Wishlist Heart */}
+        {/* Floating Wishlist Heart with Bounce Animation */}
         <TouchableOpacity
           style={styles.wishlistBtn}
-          onPress={() => toggleWishlist(product)}
+          onPress={handleToggleWishlist}
           activeOpacity={0.8}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <Ionicons
-            name={wishlisted ? 'heart' : 'heart-outline'}
-            size={18}
-            color={wishlisted ? Colors.brandRed : Colors.textPrimary}
-          />
+          <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+            <Ionicons
+              name={wishlisted ? 'heart' : 'heart-outline'}
+              size={18}
+              color={wishlisted ? Colors.brandRed : Colors.textPrimary}
+            />
+          </Animated.View>
         </TouchableOpacity>
+
+        {/* Quick Add To Bag Button */}
+        {product.inStock && (
+          <TouchableOpacity
+            style={[styles.quickAddBtn, justAdded && styles.quickAddBtnSuccess]}
+            onPress={handleQuickAdd}
+            activeOpacity={0.8}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            accessibilityLabel="Quick add to bag"
+          >
+            <Animated.View style={{ transform: [{ scale: bagScale }] }}>
+              <Ionicons
+                name={justAdded ? 'checkmark' : 'bag-add-outline'}
+                size={16}
+                color={justAdded ? Colors.textWhite : Colors.textPrimary}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+        )}
 
         {/* Out of Stock overlay */}
         {!product.inStock && (
@@ -175,6 +225,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.sm,
+  },
+  quickAddBtn: {
+    position: 'absolute',
+    bottom: Spacing.xs + 2,
+    right: Spacing.xs + 2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.brandYellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.md,
+  },
+  quickAddBtnSuccess: {
+    backgroundColor: Colors.success,
   },
   outOfStockOverlay: {
     ...StyleSheet.absoluteFill,
