@@ -191,7 +191,7 @@ export default function ChatScreen() {
                 {isBot && (
                   <View style={styles.botAvatar}>
                     <Image
-                      source={require('../../../assets/images/gorurghash-cow.png')}
+                      source={require('../../assets/images/gorurghash-cow.png')}
                       style={{ width: 22, height: 22 }}
                       resizeMode="contain"
                     />
