@@ -257,7 +257,7 @@ export default function ChatScreen() {
               <View style={styles.typingIndicator}>
                 <View style={styles.botAvatar}>
                   <Image
-                    source={require('../../../assets/images/gorurghash-cow.png')}
+                    source={require('../../assets/images/gorurghash-cow.png')}
                     style={{ width: 20, height: 20 }}
                     resizeMode="contain"
                   />
